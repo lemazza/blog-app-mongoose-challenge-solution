@@ -9,7 +9,7 @@ const expect = chai.expect;
 
 const {app, runServer, closeServer} = require('../server');
 const {BlogPost} = require('../models');
-const {TEST_DATABASE_URL} = require('../config');
+const {DATABASE_URL} = require('../config');
 
 chai.use(chaiHttp);
 
@@ -18,7 +18,7 @@ function seedBlogPostData() {
   console.log('seeding blog post data');
   const seedData = [];
 
-  for (let i =1; i<=10 i++) {
+  for (let i =1; i<=10; i++) {
     seedData.push(generateFakeBlogPost());
   }
 
@@ -27,9 +27,12 @@ function seedBlogPostData() {
 
 function generateFakeBlogPost() {
   return {
-    author: faker.name();
-    title: faker.name();
-    content: faker.lorem();
+    author: {
+      firstName: faker.name.firstName(),
+      lastName: faker.name.lastName()
+    },
+    title: faker.lorem.words(),
+    content: faker.lorem.paragraph(),
   };
 }
 
@@ -40,7 +43,7 @@ function tearDownDb() {
 
 describe('BlogPosts API resource', function() {
   before(function(){
-    return runServer(TEST_DATABASE_URL);
+    return runServer(DATABASE_URL);
   });
 
   beforeEach(function(){
@@ -91,9 +94,7 @@ describe('BlogPosts API resource', function() {
         })
         .then(function(post) {
           expect(resBlogPost.id).to.equal(post.id);
-          expect(resBlogPost.author).to.equal(post.author);
           expect(resBlogPost.title).to.equal(post.title);
-          expect(resBlogPost.created).to.equal(post.created);
           expect(resBlogPost.content).to.equal(post.content);
         });
     });
@@ -134,7 +135,10 @@ describe('BlogPosts API resource', function() {
   describe('PUT endpoint', function() {
     it('should update fields you send over', function() {
       const updateData = {
-        author: 'John Madden',
+        author: {
+          firstName: "John",
+          lastName: "Madden"
+        },
         title: 'FOOTBALL'
       };
 
